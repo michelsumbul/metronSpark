@@ -4,20 +4,22 @@
  * and open the template in the editor.
  */
 package com.metron.spark.es;
-
+import com.metron.conf.Config;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.elasticsearch.spark.rdd.api.java.JavaEsSpark;
-import com.metron.conf.Config;
-import static javafx.application.Platform.exit;
+
+
+import java.io.Console;
+import java.util.Scanner;
+
 
 /**
  *
  * @author MichelSumbul <michelsumbul@gmail.com>
  */
 public class reIndexing {
-
     public static void main(String[] args) {
 
         reIngestJson(parseInput(args));
@@ -26,10 +28,18 @@ public class reIndexing {
     public static void reIngestJson(Config configJob) {
 
         SparkConf conf = new SparkConf().setAppName(configJob.getAppName());
+        conf.set("es.nodes",configJob.getEs_node());
+        conf.set("es.index.auto.create", "true");
+
+        if(configJob.getUser() != null){
+            conf.set("es.net.http.auth.user",configJob.getUser());
+            conf.set("es.net.http.auth.pass",configJob.getPassword());
+            conf.set("es.net.ssl","true");
+        }
         JavaSparkContext sc = new JavaSparkContext(conf);
-        
+
         JavaRDD<String> rddSource;
-        
+
         if (configJob.getNumPartition() > 0) {
             rddSource = sc.textFile(configJob.getSourcePath(), configJob.getNumPartition());
         } else {
@@ -64,6 +74,19 @@ public class reIndexing {
                 configJob.setNumPartition(Integer.valueOf(args[i + 1]));
             } else if (args[i].equals("--appName")) {
                 configJob.setAppName(args[i + 1]);
+            } else if (args[i].equals("--secure-xpack")){
+                Scanner sc=new Scanner(System.in);
+                System.out.print("XPack username: ");
+                configJob.setUser(sc.nextLine());
+
+               Console console =  System.console();
+
+
+                System.out.print("XPack password: ");
+                configJob.setPassword(new String(console.readPassword()));
+              //  System.out.println(configJob.getPassword());
+            } else if(args[i].equals("--es-nodes")){
+                configJob.setEs_node(args[i+1]);
             }
 
         }
@@ -72,10 +95,10 @@ public class reIndexing {
             System.out.println("the minimum needed option are:");
             System.out.println("--index indexEsName");
             System.out.println("--source HDFSSourcePath");
-            exit();
+            System.out.println("--secure-xpack");
+            System.exit(0);
         }
 
         return configJob;
     }
-
 }

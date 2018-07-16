@@ -10,11 +10,14 @@ package com.metron.conf;
  * @author MichelSumbul <michelsumbul@gmail.com>
  */
 public class Config {
-    
+
     private String appName = "Reindexing ES data";
     private String sourcePath;
     private String indexName;
     private int numPartition;
+    private String user;
+    private String password;
+    private String es_node;
 
     /**
      * @return the sourcePath
@@ -71,5 +74,28 @@ public class Config {
     public void setAppName(String appName) {
         this.appName = appName;
     }
-    
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEs_node() {
+        return es_node;
+    }
+
+    public void setEs_node(String es_node) {
+        this.es_node = es_node;
+    }
 }
